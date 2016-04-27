@@ -17,6 +17,14 @@ def setup_files
   $report_file   = File.new('report.txt', 'w+')
 end
 
+def file_close
+  $report_file.close
+end
+
+def wline(line)
+  $report_file.puts line
+end
+
 def formatter(amount)
   amt = format("%.2f", amount)
   amt
@@ -31,16 +39,16 @@ end
 # http://patorjk.com/software/taag/#p=display&f=Graffiti&t=Type%20Something%20
 def print_heading
   # Print "Sales Report" in ascii art
-  puts '   _____       __             ____                        __'
-  puts '  / ___/____ _/ /__  _____   / __ \___  ____  ____  _____/ /_'
-  puts '  \__ \/ __ `/ / _ \/ ___/  / /_/ / _ \/ __ \/ __ \/ ___/ __/'
-  puts ' ___/ / /_/ / /  __(__  )  / _, _/  __/ /_/ / /_/ / /  / /_'
-  puts '/____/\__,_/_/\___/____/  /_/ |_|\___/ .___/\____/_/   \__/'
-  puts '                                    /_/'
+  wline '   _____       __             ____                        __'
+  wline '  / ___/____ _/ /__  _____   / __ \___  ____  ____  _____/ /_'
+  wline '  \__ \/ __ `/ / _ \/ ___/  / /_/ / _ \/ __ \/ __ \/ ___/ __/'
+  wline ' ___/ / /_/ / /  __(__  )  / _, _/  __/ /_/ / /_/ / /  / /_'
+  wline '/____/\__,_/_/\___/____/  /_/ |_|\___/ .___/\____/_/   \__/'
+  wline '                                    /_/'
 
   # Print today's date
-  puts DateTime.now.strftime('%Y-%m-%d-%H:%M')
-  puts ''
+  wline DateTime.now.strftime('%Y-%m-%d-%H:%M')
+  wline ''
 end
 
 def print_data
@@ -56,12 +64,12 @@ end
 # thanks to:
 # http://patorjk.com/software/taag/#p=display&f=Graffiti&t=Type%20Something%20
 def print_products_header
-  puts '    ____                 __           __'
-  puts '   / __ \_________  ____/ /_  _______/ /______'
-  puts '  / /_/ / ___/ __ \/ __  / / / / ___/ __/ ___/'
-  puts ' / ____/ /  / /_/ / /_/ / /_/ / /__/ /_(__  )'
-  puts '/_/   /_/   \____/\__,_/\__,_/\___/\__/____/'
-  puts ''
+  wline '    ____                 __           __'
+  wline '   / __ \_________  ____/ /_  _______/ /______'
+  wline '  / /_/ / ___/ __ \/ __  / / / / ___/ __/ ___/'
+  wline ' / ____/ /  / /_/ / /_/ / /_/ / /__/ /_(__  )'
+  wline '/_/   /_/   \____/\__,_/\__,_/\___/\__/____/'
+  wline ''
 end
 
 def print_product_data
@@ -73,13 +81,13 @@ def print_product_data
   # Calculate and print the average price the toy sold for
   # Calculate and print the average discount (% or $) based off the average sales price
   $products_hash['items'].each do |product|
-    puts "Toy Name: #{product['title']}"
-    puts "Toy Retail: #{product['full-price']}"
-    puts "Total Purchases: #{product['purchases'].length}"
-    puts "Total Sales: $#{formatter(get_total_toy_sales(product))}"
-    puts "Avg Sales Price: $#{formatter(get_avg_sales_price(product))}"
-    puts "Avg Discount: $#{formatter(get_avg_discount(product))}"
-    puts ''
+    wline "Toy Name: #{product['title']}"
+    wline "Toy Retail: #{product['full-price']}"
+    wline "Total Purchases: #{product['purchases'].length}"
+    wline "Total Sales: $#{formatter(get_total_toy_sales(product))}"
+    wline "Avg Sales Price: $#{formatter(get_avg_sales_price(product))}"
+    wline "Avg Discount: $#{formatter(get_avg_discount(product))}"
+    wline ''
   end
 end
 
@@ -131,14 +139,65 @@ def print_brands_header
 end
 
 def print_brands_data
-  # comment
+  # For each brand in the data set:
+  # Print the name of the brand
+  # Count and print the number of the brand's toys we stock
+  # Calculate and print the average price of the brand's toys
+  # Calculate and print the total sales volume of all the brand's toys combined
+  brands = build_brands_hash
+  puts ''
+
 end
 
-# Print "Brands" in ascii art
 
-# For each brand in the data set:
-# Print the name of the brand
-# Count and print the number of the brand's toys we stock
-# Calculate and print the average price of the brand's toys
-# Calculate and print the total sales volume of all the brand's toys combined
+# a really corny f1 pun method name. the point of
+# this is to create a hash that has all the data i want for the
+# brand report that will allow simpler calculation of report
+# data.
+def build_brands_hash
+  brands = {}
+  $products_hash['items'].each do |product|
+    brand = product['brand'].delete(" .").to_sym
+    toy_name = product['title'].delete(" .").to_sym
+    stock = []
+    stock << product['stock']
+    purchases = get_prod_purchases(product)
+    if brands.has_key?(brand)
+      #here we just want to add more data to existing brand hash
+      if brands[brand].has_key?(toy_name)
+        brands[brand][toy_name][:toys_in_stock] << stock if stock.length > 0
+        brands[brand][toy_name][:toy_prices] << purchases if purchases.length > 0
+      else
+        brands[brand][toy_name] = {
+          :toys_in_stock => [],
+          :toy_prices => [],
+        }
+        stock.each do |num|
+          brands[brand][toy_name][:toys_in_stock] << num
+        end
+        purchases.each do |num|
+          brands[brand][toy_name][:toy_prices] << num
+        end
+      end
+    else
+      toy_info = {
+        toy_name => {
+          :toys_in_stock => stock,
+          :toy_prices => purchases
+        }
+      }
+      brands[brand] = toy_info
+    end
+  end
+  brands
+end
+
+def get_prod_purchases(prod)
+  ary = []
+  prod['purchases'].each do |purchase|
+    ary << purchase['price']
+  end
+  ary
+end
+
 start
