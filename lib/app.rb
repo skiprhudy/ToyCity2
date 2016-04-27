@@ -3,8 +3,17 @@ require 'json'
 
 # while i could take advantage of the objects i used to implement ToyCity1
 # i decided in this project to stick closer to Udacity expectations regarding
-# implementation techniques, in this case procedural with global variables.
-# rubocop does not like globals :)
+# implementation techniques, in this case procedural-style methods and global variables.
+# rubocop does not like globals, though :)
+#
+# some thoughts: if i stuck to original design all i'd have to do is substitute wline
+# into my ToyCity1 implementation for puts. better yet it would also be easy to
+# easy to use inversion of control to print to console or file or write to a DB
+# without having to structurally alter the ToyCity1 code:
+#
+# https://github.com/skiprhudy/ToyCity
+#
+# but here is a proceedure version
 def start
   setup_files
   create_report
@@ -154,43 +163,46 @@ end
 # this is to create a hash that has all the data i want for the
 # brand report that will allow simpler calculation of report
 # data.
-def build_brands_hash
-  brands = {}
-  $products_hash['items'].each do |product|
-    brand = product['brand'].delete(" .").to_sym
-    toy_name = product['title'].delete(" .").to_sym
-    stock = []
-    stock << product['stock']
-    purchases = get_prod_purchases(product)
-    if brands.has_key?(brand)
-      #here we just want to add more data to existing brand hash
-      if brands[brand].has_key?(toy_name)
-        brands[brand][toy_name][:toys_in_stock] << stock if stock.length > 0
-        brands[brand][toy_name][:toy_prices] << purchases if purchases.length > 0
-      else
-        brands[brand][toy_name] = {
-          :toys_in_stock => [],
-          :toy_prices => [],
-        }
-        stock.each do |num|
-          brands[brand][toy_name][:toys_in_stock] << num
-        end
-        purchases.each do |num|
-          brands[brand][toy_name][:toy_prices] << num
-        end
-      end
-    else
-      toy_info = {
-        toy_name => {
-          :toys_in_stock => stock,
-          :toy_prices => purchases
-        }
-      }
-      brands[brand] = toy_info
-    end
-  end
-  brands
-end
+#
+# this experiment has been canned in favor of methods
+# that index into products_hash
+# def build_brands_hash
+#   brands = {}
+#   $products_hash['items'].each do |product|
+#     brand = product['brand'].delete(" .").to_sym
+#     toy_name = product['title'].delete(" .").to_sym
+#     stock = []
+#     stock << product['stock']
+#     purchases = get_prod_purchases(product)
+#     if brands.has_key?(brand)
+#       #here we just want to add more data to existing brand hash
+#       if brands[brand].has_key?(toy_name)
+#         brands[brand][toy_name][:toys_in_stock] << stock if stock.length > 0
+#         brands[brand][toy_name][:toy_prices] << purchases if purchases.length > 0
+#       else
+#         brands[brand][toy_name] = {
+#           :toys_in_stock => [],
+#           :toy_prices => [],
+#         }
+#         stock.each do |num|
+#           brands[brand][toy_name][:toys_in_stock] << num
+#         end
+#         purchases.each do |num|
+#           brands[brand][toy_name][:toy_prices] << num
+#         end
+#       end
+#     else
+#       toy_info = {
+#         toy_name => {
+#           :toys_in_stock => stock,
+#           :toy_prices => purchases
+#         }
+#       }
+#       brands[brand] = toy_info
+#     end
+#   end
+#   brands
+# end
 
 def get_prod_purchases(prod)
   ary = []
