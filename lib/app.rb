@@ -8,7 +8,7 @@ require 'json'
 #
 # some thoughts: if i stuck to original design all i'd have to do is substitute wline
 # into my ToyCity1 implementation for puts. better yet it would also be easy to
-# easy to use inversion of control to print to console or file or write to a DB
+# use inversion of control to print to console or file or write to a DB or API
 # without having to structurally alter the ToyCity1 code:
 #
 # https://github.com/skiprhudy/ToyCity
@@ -153,56 +153,75 @@ def print_brands_data
   # Count and print the number of the brand's toys we stock
   # Calculate and print the average price of the brand's toys
   # Calculate and print the total sales volume of all the brand's toys combined
+  #
+  # Question: why is stock toy blind? we don't know how many of the in-stock
+  # items are one toy or another toy. the boss won't like that.
   brands = build_brands_hash
-  puts ''
-
+  brands.each do |brand,data|
+    puts "Brand: #{brand['title']}"
+    puts "Num Toys: #{brand['stock']}"
+    puts "Avg Toy Price: $#{brand_avg_toy_price data}"
+    puts "Total Sales: $#{brand_total_sales data}"
+  end
+end
+#broken but need to upload so i don't lose data in tstorms
+def brand_avg_toy_price(data)
+  res = 0.0
+  data.each do |toy_name, data|
+    no need index ...
+    res += brand_total_sales data
+  end
+  res = res / brand[:toy_prices].length
+  formatter res
 end
 
+def brand_total_sales(data)
+  res = 0.0
+  if !data[:toy_prices].empty?
+    res = brand[:toy_prices].inject { |result,element| result + element }
+  end
+  formatter res
+end
 
-# a really corny f1 pun method name. the point of
-# this is to create a hash that has all the data i want for the
-# brand report that will allow simpler calculation of report
-# data.
-#
-# this experiment has been canned in favor of methods
-# that index into products_hash
-# def build_brands_hash
-#   brands = {}
-#   $products_hash['items'].each do |product|
-#     brand = product['brand'].delete(" .").to_sym
-#     toy_name = product['title'].delete(" .").to_sym
-#     stock = []
-#     stock << product['stock']
-#     purchases = get_prod_purchases(product)
-#     if brands.has_key?(brand)
-#       #here we just want to add more data to existing brand hash
-#       if brands[brand].has_key?(toy_name)
-#         brands[brand][toy_name][:toys_in_stock] << stock if stock.length > 0
-#         brands[brand][toy_name][:toy_prices] << purchases if purchases.length > 0
-#       else
-#         brands[brand][toy_name] = {
-#           :toys_in_stock => [],
-#           :toy_prices => [],
-#         }
-#         stock.each do |num|
-#           brands[brand][toy_name][:toys_in_stock] << num
-#         end
-#         purchases.each do |num|
-#           brands[brand][toy_name][:toy_prices] << num
-#         end
-#       end
-#     else
-#       toy_info = {
-#         toy_name => {
-#           :toys_in_stock => stock,
-#           :toy_prices => purchases
-#         }
-#       }
-#       brands[brand] = toy_info
-#     end
-#   end
-#   brands
-# end
+# a corny formula 1 pun. this will allow simpler calculation of report
+# data; i'm not seeing a good way to index into products to solve the brand
+# report without going spaghetti. so i'll be interested to see the official solution
+def build_brands_hash
+  brands = {}
+  $products_hash['items'].each do |product|
+    brand = product['brand'].delete(" .").to_sym
+    toy_name = product['title'].delete(" .").to_sym
+    stock = product['stock']
+    purchases = get_prod_purchases(product)
+    if brands.has_key?(brand)
+      #here we just want to add more data to existing brand hash
+      if brands[brand].has_key?(toy_name)
+        brands[brand][toy_name][:toys_in_stock] = stock
+        purchases.each do |num|
+          brands[brand][toy_name][:toy_prices] << num
+        end
+      else
+        brands[brand][toy_name] = {
+          :toys_in_stock => 0,
+          :toy_prices => [],
+        }
+        brands[brand][toy_name][:toys_in_stock] = stock
+        purchases.each do |num|
+          brands[brand][toy_name][:toy_prices] << num
+        end
+      end
+    else
+      toy_info = {
+        toy_name => {
+          :toys_in_stock => stock,
+          :toy_prices => purchases
+        }
+      }
+      brands[brand] = toy_info
+    end
+  end
+  brands
+end
 
 def get_prod_purchases(prod)
   ary = []
