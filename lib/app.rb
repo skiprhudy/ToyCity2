@@ -183,9 +183,10 @@ end
 
 # a corny formula 1 pun. this will allow simpler calculation of report
 # data; i'm not seeing a good way to index into products to solve the brand
-# report without looping through the products first. i'll be interested to
-# see alternate methods. name of brand and total stock are set in here,
-# could be extracted but no clear advantage ...
+# report without looping through the products first, because brands cuts
+# across product data. i'll be interested to see alternate methods. name of
+# brand and total stock are set in here, could be extracted but no clear
+# advantage ...
 def build_brands_hash
   brands = {}
   $products_hash['items'].each do |product|

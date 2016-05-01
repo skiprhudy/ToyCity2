@@ -1,0 +1,35 @@
+commit d50b0dbbfcdea0e5a7b688c18d13680c2d65160f
+Author: codemutt <skiprhudy@hotmail.com>
+Date:   Sun May 1 13:30:20 2016 -0500
+
+    fixed up working to spec
+
+commit 6601aedc506edb6b26ebfc3d8c330860ef9ce9dd
+Author: codemutt <skiprhudy@hotmail.com>
+Date:   Fri Apr 29 20:52:57 2016 -0500
+
+    tstorm checkin
+
+commit 96a974900c44c9ccbb97508a2082f89a99e7981c
+Author: codemutt <skiprhudy@hotmail.com>
+Date:   Wed Apr 27 00:01:16 2016 -0500
+
+    get rid of brands hash, consider alternative approach using Toycity1 work
+
+commit 91914c5daa9717e783a35147624ec36164221d05
+Author: codemutt <skiprhudy@hotmail.com>
+Date:   Tue Apr 26 23:48:59 2016 -0500
+
+    brands hash -- just for posterity. will refactor to index into products hash
+
+commit c9baf5a9876759be628cde7c8d532936f00e3c6e
+Author: codemutt <skiprhudy@hotmail.com>
+Date:   Mon Apr 25 22:14:55 2016 -0500
+
+    products interim to console meet specs
+
+commit fbc6ace0a49572164ec53913f4d55709e38af9dd
+Author: codemutt <skiprhudy@hotmail.com>
+Date:   Mon Apr 25 10:21:56 2016 -0500
+
+    initial revision
