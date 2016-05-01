@@ -3,13 +3,15 @@ require 'json'
 
 # while i could take advantage of the objects i used to implement ToyCity1
 # i decided in this project to stick closer to Udacity expectations regarding
-# implementation techniques, in this case procedural-style methods and global variables.
+# implementation techniques, in this case procedural-style methods and global
+# variables.
+#
 # rubocop does not like globals, though :)
 #
-# some thoughts: if i stuck to original design all i'd have to do is substitute wline
-# into my ToyCity1 implementation for puts. better yet it would also be easy to
-# use inversion of control to print to console or file or write to a DB or API
-# without having to structurally alter the ToyCity1 code:
+# some thoughts: if i stuck to original design all i'd have to do is substitute
+# wline into my ToyCity1 implementation for puts. better yet it would also be
+# easy to use inversion of control to print to console or file or write to a DB
+# or API without having to structurally alter the ToyCity1 code:
 #
 # https://github.com/skiprhudy/ToyCity
 #
@@ -35,7 +37,7 @@ def wline(line)
 end
 
 def formatter(amount)
-  amt = format("%.2f", amount)
+  amt = format('%.2f', amount)
   amt
 end
 
@@ -88,7 +90,8 @@ def print_product_data
   # Calculate and print the total number of purchases
   # Calculate and print the total amount of sales
   # Calculate and print the average price the toy sold for
-  # Calculate and print the average discount (% or $) based off the average sales price
+  # Calculate and print the average discount (% or $) based off the average
+  # sales price
   $products_hash['items'].each do |product|
     wline "Toy Name: #{product['title']}"
     wline "Toy Retail: #{product['full-price']}"
@@ -101,17 +104,17 @@ def print_product_data
 end
 
 def get_total_toy_sales(prod)
-  res = sum_sales(prod)
+  sum_sales(prod)
 end
 
 def get_avg_sales_price(prod)
   res = sum_sales(prod)
-  final = res / prod['purchases'].length
+  res / prod['purchases'].length
 end
 
 def get_avg_discount(prod)
   res = get_avg_sales_price(prod)
-  res = prod['full-price'].to_f - res
+  prod['full-price'].to_f - res
 end
 
 # as per feedback on ToyCity1 i'm trying out inject. but it seems to
@@ -121,14 +124,13 @@ end
 # more elegant? it's good to learn about regardless. could have used reduce too.
 def sum_sales(prod)
   amt = []
-  if prod['purchases'].empty?
-    return 0.00
-  else
-    prod['purchases'].each do |purchase|
-      amt << purchase['price']
-    end
+  res = 0.00
+  return res if prod['purchases'].empty?
+  prod['purchases'].each do |purchase|
+    amt << purchase['price']
     res = amt.inject { |result, element| result + element }
   end
+  res
 end
 
 def make_brands_section
@@ -147,7 +149,6 @@ def print_brands_header
   wline ''
 end
 
-
 def print_brands_data
   # For each brand in the data set:
   # Print the name of the brand
@@ -155,56 +156,50 @@ def print_brands_data
   # Calculate and print the average price of the brand's toys
   # Calculate and print the total sales volume of all the brand's toys combined
   #
-  # Question: why is stock toy "blind"? we don't know how many of the in-stock
-  # items are one toy or another toy. the boss won't like that. should be a hash
+  # Question: why is stock toy type/name "blind"? we don't know how many of the
+  # in-stock items are one toy or another toy. the boss won't like that.
   brands = build_brands_hash
-  brands.each do |brand,data|
+  brands.each do |brand, data|
     wline "Brand: #{brand}"
     wline "Num Toys in Stock: #{data[:num_toys_in_stock]}"
     wline "Avg Toy Price: $#{formatter brand_avg_toy_price data}"
     wline "Total Sales: $#{formatter brand_total_sales data}"
-    wline ""
+    wline ''
   end
 end
-#broken but need to upload so i don't lose data in tstorms
+
 def brand_avg_toy_price(data)
   res = brand_total_sales(data)
-  res = res / data[:sales_prices].length
+  res / data[:sales_prices].length
 end
 
 def brand_total_sales(data)
   res = 0.0
-  if !data[:sales_prices].empty?
-    res = data[:sales_prices].inject { |result,element| result + element }
+  unless data[:sales_prices].empty?
+    res = data[:sales_prices].inject { |result, element| result + element }
   end
   res
 end
 
 # a corny formula 1 pun. this will allow simpler calculation of report
 # data; i'm not seeing a good way to index into products to solve the brand
-# report without going spaghetti. so i'll be interested to see the official solution
+# report without looping through the products first. i'll be interested to
+# see alternate methods. name of brand and total stock are set in here,
+# could be extracted but no clear advantage ...
 def build_brands_hash
-  # brands = {
-  #   name: str,
-  #   num_toys_in_stock: int,
-  #   sales_prices: [float]
-  # }
   brands = {}
   $products_hash['items'].each do |product|
-    name = product['brand'].delete(" .").to_sym
+    name = product['brand'].delete(' .').to_sym
     stock = product['stock']
     purchases = get_prod_purchases(product)
-    if brands.has_key?(name)
-      #here we just want to add more data to existing brand hash
-      #just add the toy sales prices in
-      #only just adding stock and price
+    if brands.key?(name)
       brands[name][:num_toys_in_stock] += stock
       brands[name][:sales_prices].concat(purchases)
     else
-        toy_info = {
-          :num_toys_in_stock => stock,
-          :sales_prices => purchases
-        }
+      toy_info = {
+        num_toys_in_stock: stock,
+        sales_prices: purchases
+      }
       brands[name] = toy_info
     end
   end
