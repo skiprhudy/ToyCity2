@@ -139,13 +139,14 @@ end
 # thanks to:
 # http://patorjk.com/software/taag/#p=display&f=Graffiti&t=Type%20Something%20
 def print_brands_header
-  puts '    ____                       __'
-  puts '   / __ )_________ _____  ____/ /____'
-  puts '  / __  / ___/ __ `/ __ \/ __  / ___/'
-  puts ' / /_/ / /  / /_/ / / / / /_/ (__  )'
-  puts '/_____/_/   \__,_/_/ /_/\__,_/____/'
-  puts ''
+  wline '    ____                       __'
+  wline '   / __ )_________ _____  ____/ /____'
+  wline '  / __  / ___/ __ `/ __ \/ __  / ___/'
+  wline ' / /_/ / /  / /_/ / / / / /_/ (__  )'
+  wline '/_____/_/   \__,_/_/ /_/\__,_/____/'
+  wline ''
 end
+
 
 def print_brands_data
   # For each brand in the data set:
@@ -154,70 +155,57 @@ def print_brands_data
   # Calculate and print the average price of the brand's toys
   # Calculate and print the total sales volume of all the brand's toys combined
   #
-  # Question: why is stock toy blind? we don't know how many of the in-stock
-  # items are one toy or another toy. the boss won't like that.
+  # Question: why is stock toy "blind"? we don't know how many of the in-stock
+  # items are one toy or another toy. the boss won't like that. should be a hash
   brands = build_brands_hash
   brands.each do |brand,data|
-    puts "Brand: #{brand['title']}"
-    puts "Num Toys: #{brand['stock']}"
-    puts "Avg Toy Price: $#{brand_avg_toy_price data}"
-    puts "Total Sales: $#{brand_total_sales data}"
+    wline "Brand: #{brand}"
+    wline "Num Toys in Stock: #{data[:num_toys_in_stock]}"
+    wline "Avg Toy Price: $#{formatter brand_avg_toy_price data}"
+    wline "Total Sales: $#{formatter brand_total_sales data}"
+    wline ""
   end
 end
 #broken but need to upload so i don't lose data in tstorms
 def brand_avg_toy_price(data)
-  res = 0.0
-  data.each do |toy_name, data|
-    no need index ...
-    res += brand_total_sales data
-  end
-  res = res / brand[:toy_prices].length
-  formatter res
+  res = brand_total_sales(data)
+  res = res / data[:sales_prices].length
 end
 
 def brand_total_sales(data)
   res = 0.0
-  if !data[:toy_prices].empty?
-    res = brand[:toy_prices].inject { |result,element| result + element }
+  if !data[:sales_prices].empty?
+    res = data[:sales_prices].inject { |result,element| result + element }
   end
-  formatter res
+  res
 end
 
 # a corny formula 1 pun. this will allow simpler calculation of report
 # data; i'm not seeing a good way to index into products to solve the brand
 # report without going spaghetti. so i'll be interested to see the official solution
 def build_brands_hash
+  # brands = {
+  #   name: str,
+  #   num_toys_in_stock: int,
+  #   sales_prices: [float]
+  # }
   brands = {}
   $products_hash['items'].each do |product|
-    brand = product['brand'].delete(" .").to_sym
-    toy_name = product['title'].delete(" .").to_sym
+    name = product['brand'].delete(" .").to_sym
     stock = product['stock']
     purchases = get_prod_purchases(product)
-    if brands.has_key?(brand)
+    if brands.has_key?(name)
       #here we just want to add more data to existing brand hash
-      if brands[brand].has_key?(toy_name)
-        brands[brand][toy_name][:toys_in_stock] = stock
-        purchases.each do |num|
-          brands[brand][toy_name][:toy_prices] << num
-        end
-      else
-        brands[brand][toy_name] = {
-          :toys_in_stock => 0,
-          :toy_prices => [],
-        }
-        brands[brand][toy_name][:toys_in_stock] = stock
-        purchases.each do |num|
-          brands[brand][toy_name][:toy_prices] << num
-        end
-      end
+      #just add the toy sales prices in
+      #only just adding stock and price
+      brands[name][:num_toys_in_stock] += stock
+      brands[name][:sales_prices].concat(purchases)
     else
-      toy_info = {
-        toy_name => {
-          :toys_in_stock => stock,
-          :toy_prices => purchases
+        toy_info = {
+          :num_toys_in_stock => stock,
+          :sales_prices => purchases
         }
-      }
-      brands[brand] = toy_info
+      brands[name] = toy_info
     end
   end
   brands
